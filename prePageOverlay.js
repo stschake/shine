@@ -1,5 +1,5 @@
 function onPreRequest(request, sender, callback) {
     chrome.extension.onRequest.removeListener(arguments.callee);
-    callback(($('._shine-overlay').size()==0));
+    callback(document.getElementById('_shineBarLoaded')==null);
 }
 chrome.extension.onRequest.addListener(onPreRequest);
