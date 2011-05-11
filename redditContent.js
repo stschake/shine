@@ -37,9 +37,14 @@ function thingClicked() {
   }
 }
 
+function findRedditScript() {
+  const redditScript = 'var reddit';
+  return $('script:contains('+redditScript+')');
+}
+
 $(document).ready(function() {
   console.log('Shine reddit content handler running.');
 	$('.thing a.title').click(thingClicked);
-  var modhash = $('script').first().text().match(/modhash:\s*'(\w*)'/)[1];
+  var modhash = findRedditScript().text().match(/modhash:\s*'(\w*)'/)[1];
   chrome.extension.sendRequest({action:'modhashUpdate', modhash:modhash});
 });
