@@ -187,11 +187,20 @@
           if (callback) { callback(); }
         }
       }
+      
 
+      function _addOverlayContent(tab,callback){
+        chrome.tabs.sendRequest(tab.id,{action:'add'},function(r){
+          if(r){
+            addContent(tab,[{type:'css', file:'pageOverlay.css'},{type:'js',  file:'pageOverlay.js'}], callback);
+          }
+        });
+      }
+      
+      
       function addOverlayContent(tab, callback) {
-        addContent(tab, [{type:'js',  file:'jquery-1.4.2.min.js'},
-                         {type:'css', file:'pageOverlay.css'},
-                         {type:'js',  file:'pageOverlay.js'}], callback);
+        addContent(tab, [{type:'js',  file:'jquery-1.4.2.min.js'}]);
+        addContent(tab,[{type:'js',file:'prePageOverlay.js'}],_addOverlayContent(tab,callback))
       }
 
       function ensureOverlay(tab, callback) {
