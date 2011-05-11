@@ -14,6 +14,7 @@ ShineOverlay.prototype = {
       .append(this.frame)
       .appendTo('body')
       .css('visibility', 'visible');
+    this.indicator=$('<div id="_shineBarLoaded"/>').appendTo('body').css('display','none');
   },
   
   resize: function(width, height) {
