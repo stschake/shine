@@ -14,6 +14,7 @@ ShineOverlay.prototype = {
       .append(this.frame)
       .appendTo('body')
       .css('visibility', 'visible');
+    this.indicator=$('<div id="_shineBarLoaded"/>').appendTo('body').css('display','none');
   },
   
   resize: function(width, height) {
@@ -44,34 +45,37 @@ ShineOverlay.prototype = {
   }
 }
 
+t=($('._shine-overlay').size()==0);
 
-shineBar = new ShineOverlay('bar');
-$.extend(shineBar, {
-  _display: function(url) {
-    this.frame.show().attr('src', chrome.extension.getURL(url));
-    window.setTimeout($.proxy(function() {
-      this.frame.height(this.frame.height()+1);
-    }, this), 10);
-  },
+if(t){
+  shineBar = new ShineOverlay('bar');
+  $.extend(shineBar, {
+    _display: function(url) {
+      this.frame.show().attr('src', chrome.extension.getURL(url));
+      window.setTimeout($.proxy(function() {
+        this.frame.height(this.frame.height()+1);
+      }, this), 10);
+    },
 
-  display: function(info, loggedIn) {
-    if (info) {
-      if (!this.info || this.info.name == info.name) {
-        this.info = info;
-        // Another chrome bug prevents us from properly using postMessage on our child iframe, so we resort to another hack:
-        // We'll change the height of the iframe ever so slightly (not displayed), and pick up the resize event inside the frame.
-        this._display('bar.html#'+encodeURIComponent(JSON.stringify({info:info, loggedIn:loggedIn})));
+    display: function(info, loggedIn) {
+      if (info) {
+        if (!this.info || this.info.name == info.name) {
+          this.info = info;
+          // Another chrome bug prevents us from properly using postMessage on our child iframe, so we resort to another hack:
+          // We'll change the height of the iframe ever so slightly (not displayed), and pick up the resize event inside the frame.
+          this._display('bar.html#'+encodeURIComponent(JSON.stringify({info:info, loggedIn:loggedIn})));
+        }
+      } else {
+        this.info = null;
+        this.frame.hide();
       }
-    } else {
-      this.info = null;
-      this.frame.hide();
-    }
-  },
+    },
 
-  showSubmit: function() {
-    this._display('submit.html#'+encodeURIComponent(window.location.href));
-  }
-});
+    showSubmit: function() {
+      this._display('submit.html#'+encodeURIComponent(window.location.href));
+    }
+  });
+}
 
 function onRequest(request, sender, callback) {
   if (request.action == 'showInfo') {
@@ -81,7 +85,6 @@ function onRequest(request, sender, callback) {
     shineBar.showSubmit();
   }
 }
-chrome.extension.onRequest.addListener(onRequest);
 
 // Unfortunately, chrome.* is sadly not available to iframes in current versions.
 // We'll have to get a little bit creative!
@@ -100,6 +103,9 @@ function receiveMessage(event) {
     }
   }
 }
-window.addEventListener('message', receiveMessage, false);
 
-console.log('Shine page overlay loaded.');
+if(t){
+  chrome.extension.onRequest.addListener(onRequest);
+  window.addEventListener('message', receiveMessage, false);
+  console.log('Shine page overlay loaded.');
+}
